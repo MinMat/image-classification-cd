@@ -9,6 +9,7 @@ import model.model as module_arch
 from parse_config import ConfigParser
 from trainer import Trainer
 
+from IPython.core.debugger import set_trace
 
 # fix random seeds for reproducibility
 SEED = 123
@@ -21,6 +22,7 @@ def main(config):
     logger = config.get_logger('train')
 
     # setup data_loader instances
+
     data_loader = config.init_obj('data_loader', module_data)
     valid_data_loader = data_loader.split_validation()
 
@@ -31,7 +33,8 @@ def main(config):
     # get function handles of loss and metrics
     criterion = getattr(module_loss, config['loss'])
     metrics = [getattr(module_metric, met) for met in config['metrics']]
-
+    
+    set_trace()
     # build optimizer, learning rate scheduler. delete every lines containing lr_scheduler for disabling scheduler
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
     optimizer = config.init_obj('optimizer', torch.optim, trainable_params)

@@ -3,6 +3,16 @@ import torch
 from torchvision.utils import make_grid
 from base import BaseTrainer
 from utils import inf_loop, MetricTracker
+from IPython.core.debugger import set_trace
+from trainer.device_data_loaders import DeviceDataLoader
+from trainer.device_data_loaders import get_default_device
+
+@torch.no_grad()
+def evaluate(model, val_loader):
+    model.eval()
+    outputs = [model.validation_step(batch) for batch in val_loader]
+    return model.validation_epoch_end(outputs)
+ 
 
 
 class Trainer(BaseTrainer):
@@ -12,6 +22,9 @@ class Trainer(BaseTrainer):
     def __init__(self, model, criterion, metric_ftns, optimizer, config, data_loader,
                  valid_data_loader=None, lr_scheduler=None, len_epoch=None):
         super().__init__(model, criterion, metric_ftns, optimizer, config)
+    
+    
+    
         self.config = config
         self.data_loader = data_loader
         if len_epoch is None:
@@ -21,6 +34,7 @@ class Trainer(BaseTrainer):
             # iteration-based training
             self.data_loader = inf_loop(data_loader)
             self.len_epoch = len_epoch
+            
         self.valid_data_loader = valid_data_loader
         self.do_validation = self.valid_data_loader is not None
         self.lr_scheduler = lr_scheduler
@@ -28,7 +42,37 @@ class Trainer(BaseTrainer):
 
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
         self.valid_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns], writer=self.writer)
+    
 
+
+    def fit(self):
+        torch.cuda.empty_cache()
+        history = []
+        optimizer = self.optimizer
+        
+        device = get_default_device()
+        device_data_loader = DeviceDataLoader(self.data_loader, device)
+        device_valid_data_loader = DeviceDataLoader(self.valid_data_loader, device)
+        
+        for epoch in range(self.len_epoch):
+            # Training Phase 
+            self.model.train()
+            train_losses = []
+            for batch in device_data_loader:
+                loss = self.model.training_step(batch)
+                train_losses.append(loss)
+                loss.backward()
+                optimizer.step()
+                optimizer.zero_grad()
+            # Validation phase
+            result = evaluate(self.model, device_valid_data_loader)
+            
+            result['train_loss'] = torch.stack(train_losses).mean().item()
+            self.model.epoch_end(epoch, result)
+            history.append(result)
+        return history
+    
+    
     def _train_epoch(self, epoch):
         """
         Training logic for an epoch
@@ -38,17 +82,21 @@ class Trainer(BaseTrainer):
         """
         self.model.train()
         self.train_metrics.reset()
-        for batch_idx, (data, target) in enumerate(self.data_loader):
-            data, target = data.to(self.device), target.to(self.device)
+        
 
+        for batch_idx, (data, target) in enumerate(self.data_loader):            
+            data, target = data.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
+
             output = self.model(data)
             loss = self.criterion(output, target)
             loss.backward()
             self.optimizer.step()
-
+            
             self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
             self.train_metrics.update('loss', loss.item())
+            
+            
             for met in self.metric_ftns:
                 self.train_metrics.update(met.__name__, met(output, target))
 
@@ -71,6 +119,10 @@ class Trainer(BaseTrainer):
             self.lr_scheduler.step()
         return log
 
+    
+    
+    
+    
     def _valid_epoch(self, epoch):
         """
         Validate after training an epoch

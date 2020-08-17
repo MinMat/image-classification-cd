@@ -13,18 +13,10 @@
             "data_dir": "data/IMG/training_set",
             "batch_size": 64,
             "shuffle": true,
-            "validation_split": 2000,
+            "validation_split": 0.2,
             "num_workers": 3
         }
     },
-    
-    "predict_data_loader": {
-        "type": "ImageDataLoader",
-        "args":{
-            "data_dir": "data/IMG/test"
-        }
-    }, 
-    
     "optimizer": {
         "type": "Adam",
         "args":{

@@ -12,11 +12,10 @@ class BaseDataLoader(DataLoader):
     def __init__(self, dataset, batch_size, shuffle, validation_split, num_workers, collate_fn=default_collate):
         self.validation_split = validation_split
         self.shuffle = shuffle
-
         self.batch_idx = 0
         self.n_samples = len(dataset)
 
-        self.sampler, self.valid_sampler = self._split_sampler(self.validation_split)
+        self.sampler, self.valid_sampler, self.test_sampler = self._split_sampler(self.validation_split)
 
         self.init_kwargs = {
             'dataset': dataset,
@@ -42,22 +41,50 @@ class BaseDataLoader(DataLoader):
             len_valid = split
         else:
             len_valid = int(self.n_samples * split)
+        
 
+        
+        
+        set_trace()
+        #This is validaton set
         valid_idx = idx_full[0:len_valid]
+        
+        # This is training set
         train_idx = np.delete(idx_full, np.arange(0, len_valid))
+        
+        
+        test_split = 0.8
+        
+        if isinstance(test_split, int):
+            assert test_split > 0
+            assert test_split < self.n_samples, "validation set size is configured to be larger than entire dataset."
+            len_test = test_split
+        else:
+            len_test = int(len(train_idx) * test_split)
+        
+        #This is test set
+        test_idx = np.delete(train_idx, np.arange(0, len_test))
+        updated_train_idx = train_idx[0:len_test]
 
-        train_sampler = SubsetRandomSampler(train_idx)
+        train_sampler = SubsetRandomSampler(updated_train_idx)
+        test_sampler = SubsetRandomSampler(test_idx)
         valid_sampler = SubsetRandomSampler(valid_idx)
 
         # turn off shuffle option which is mutually exclusive with sampler
         self.shuffle = False
         self.n_samples = len(train_idx)
-        return train_sampler, valid_sampler
+        
+      
+        return train_sampler, valid_sampler, test_sampler
 
-    
-    
     def split_validation(self):
         if self.valid_sampler is None:
             return None
         else:
             return DataLoader(sampler=self.valid_sampler, **self.init_kwargs)
+    
+    def split_test(self):
+        if self.test_sampler is None:
+            return None
+        else:
+            return DataLoader(sampler=self.test_sampler, **self.init_kwargs)

@@ -1,4 +1,12 @@
 import torch
+from pytorch_lightning.metrics.functional import auc,f1_score
+
+
+def auc(outputs, target, reorder=True):
+    _, pred = torch.max(outputs, dim=1)
+    score = auc(pred,target,reorder=True)
+    return score
+
 
 def accuracy(outputs, labels):
     _, preds = torch.max(outputs, dim=1)

@@ -7,10 +7,13 @@ import model.metric as module_metric
 import model.model as module_arch
 from parse_config import ConfigParser
 
+from IPython.core.debugger import set_trace
+
 
 def main(config):
     logger = config.get_logger('test')
-
+    set_trace()
+    # setup data_loader for test instances
     # setup data_loader instances
     data_loader = getattr(module_data, config['data_loader']['type'])(
         config['data_loader']['args']['data_dir'],
@@ -19,8 +22,8 @@ def main(config):
         validation_split=0.0,
         training=False,
         num_workers=2
-    )
-
+    ) 
+    
     # build model architecture
     model = config.init_obj('arch', module_arch)
     logger.info(model)
@@ -44,6 +47,7 @@ def main(config):
     total_loss = 0.0
     total_metrics = torch.zeros(len(metric_fns))
 
+    set_trace()
     with torch.no_grad():
         for i, (data, target) in enumerate(tqdm(data_loader)):
             data, target = data.to(device), target.to(device)

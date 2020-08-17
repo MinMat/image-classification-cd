@@ -93,6 +93,7 @@ class Trainer(BaseTrainer):
             loss.backward()
             self.optimizer.step()
             
+            set_trace()
             self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
             self.train_metrics.update('loss', loss.item())
             

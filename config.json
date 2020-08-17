@@ -1,11 +1,12 @@
 {
-    "name": "image_Net",
+    "name": "image_classification",
     "n_gpu": 1,
 
     "arch": {
         "type": "ImageClassificationModel",
         "args": {}
     },
+    
     "data_loader": {
         "type": "ImageDataLoader",
         "args":{
@@ -16,8 +17,16 @@
             "num_workers": 3
         }
     },
+    
+    "predict_data_loader": {
+        "type": "ImageDataLoader",
+        "args":{
+            "data_dir": "data/IMG/test"
+        }
+    }, 
+    
     "optimizer": {
-        "type": "SGD",
+        "type": "Adam",
         "args":{
             "lr": 0.001
         }
@@ -34,7 +43,7 @@
         }
     },
     "trainer": {
-        "epochs": 10,
+        "epochs": 25,
 
         "save_dir": "saved/",
         "save_period": 1,

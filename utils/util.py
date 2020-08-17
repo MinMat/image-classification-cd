@@ -25,6 +25,8 @@ def inf_loop(data_loader):
     for loader in repeat(data_loader):
         yield from loader
 
+        
+        
 class MetricTracker:
     def __init__(self, *keys, writer=None):
         self.writer = writer

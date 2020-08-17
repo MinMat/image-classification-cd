@@ -16,7 +16,18 @@
             "validation_split": 0.2,
             "num_workers": 3
         }
+    },  
+    "predict_data_loader": {
+        "type": "ImageDataLoaderPredict",
+        "args":{
+            "data_dir": "data/IMG/training_set",
+            "batch_size": 1,
+            "shuffle": true,
+            "validation_split": 0.2,
+            "num_workers": 3
+        }
     },
+    
     "optimizer": {
         "type": "Adam",
         "args":{

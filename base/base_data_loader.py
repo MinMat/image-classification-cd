@@ -43,9 +43,6 @@ class BaseDataLoader(DataLoader):
             len_valid = int(self.n_samples * split)
         
 
-        
-        
-        set_trace()
         #This is validaton set
         valid_idx = idx_full[0:len_valid]
         

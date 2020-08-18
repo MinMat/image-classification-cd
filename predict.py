@@ -1,5 +1,6 @@
 import argparse
 import torch
+import json
 from tqdm import tqdm
 import data_loader.predict_data_loaders as module_data
 import model.loss as module_loss
@@ -10,20 +11,27 @@ from parse_config import ConfigParser
 from IPython.core.debugger import set_trace
 
 
-def write_label_predictions(model, device, test_loader):
+def write_label_predictions(model, device, loader):
     model.eval()
-    predictions = []
-    
-    f = open("test_y", "w")
+    predictions = {}
     with torch.no_grad():
-        for i, (data, target) in enumerate(tqdm(test_loader)):
-            sample_fname, _ = test_loader.dataset.samples[i]
+        set_trace()
+        for i, (data, target) in enumerate(tqdm(loader)):
+            sample_fname, _ = loader.dataset.samples[i]
             data, target = data.to(device), target.to(device)
             output = model(data)
             _, predicted = torch.max(output.data, 1)
-            sample_fname, _ = test_loader.dataset.samples[i]
-            f.write("{}, {}\n".format(sample_fname, predicted))
-    f.close()        
+            sample_fname, _ = loader.dataset.samples[i]
+           
+            #Torch tensor needs to be moved to CPU and then converted to numpy array
+            if int(predicted.cpu().data.numpy()[0]) == 0:
+                predictions.update({sample_fname: "cat" })
+            else:
+                predictions.update({sample_fname: "dog"})
+            
+        return predictions
+
+
 
 
 def main(config):
@@ -48,7 +56,13 @@ def main(config):
     # prepare model for testing
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
-    write_label_predictions(model, device, test_data_loader)
+    predictions = write_label_predictions(model, device, data_loader)
+    
+    #Write predictions to JSON
+    with open('predictions.json', 'w', encoding='utf-8') as outfile: 
+        outfile.write(json.dumps(predictions, ensure_ascii=False, indent=4))
+        #json.dump(predictions, outfile, ensure_ascii=False, indent=4) 
+    
  
 
 

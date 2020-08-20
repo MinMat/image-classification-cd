@@ -36,6 +36,7 @@ RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.7.
  && conda install -y pandas \
  && conda install -y ipython \
  && conda install -y matplotlib\
+ && conda install -y natsort\
  && conda clean -ya
 
 # CUDA 10.1-specific steps

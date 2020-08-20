@@ -15,7 +15,7 @@ def write_label_predictions(model, device, loader):
     model.eval()
     predictions = {}
     with torch.no_grad():
-        set_trace()
+
      
         for label,(target,index) in enumerate(tqdm(loader)): 
             #sample_fname, _ = loader.dataset.samples[i]

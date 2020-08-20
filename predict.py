@@ -15,12 +15,20 @@ def write_label_predictions(model, device, loader):
     model.eval()
     predictions = {}
     with torch.no_grad():
-        for i, (data, target) in enumerate(tqdm(loader)):
-            sample_fname, _ = loader.dataset.samples[i]
-            data, target = data.to(device), target.to(device)
-            output = model(data)
+        set_trace()
+     
+        for label,(target,index) in enumerate(tqdm(loader)): 
+            #sample_fname, _ = loader.dataset.samples[i]
+            #data, target = data.to(device), target.to(device)
+            #output = model(data)
+            #_, predicted = torch.max(output.data, 1)
+            #sample_fname, _ = loader.dataset.samples[i]
+            
+            img_data, img_index = target.to(device), index.to(device)
+            output = model(img_data)
             _, predicted = torch.max(output.data, 1)
-            sample_fname, _ = loader.dataset.samples[i]
+            sample_fname = loader.dataset.total_imgs[img_index.item()]
+  
            
             #Torch tensor needs to be moved to CPU and then converted to numpy array
             if int(predicted.cpu().data.numpy()[0]) == 0:
@@ -35,7 +43,6 @@ def write_label_predictions(model, device, loader):
 
 def main(config):
     logger = config.get_logger('predict')
-   
     # setup data_loader instances
     data_loader = config.init_obj('predict_data_loader', module_data)
     

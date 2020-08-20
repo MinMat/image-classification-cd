@@ -20,10 +20,10 @@
     "predict_data_loader": {
         "type": "ImageDataLoaderPredict",
         "args":{
-            "data_dir": "data/IMG/training_set",
+            "data_dir": "data/IMG/test_set",
             "batch_size": 1,
-            "shuffle": true,
-            "validation_split": 0.2,
+            "shuffle": false,
+            "validation_split": 0.0,
             "num_workers": 3
         }
     },

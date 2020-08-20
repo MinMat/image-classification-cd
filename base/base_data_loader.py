@@ -28,7 +28,7 @@ class BaseDataLoader(DataLoader):
 
     def _split_sampler(self, split):
         if split == 0.0:
-            return None, None
+            return None, None, None
 
         idx_full = np.arange(self.n_samples)
 

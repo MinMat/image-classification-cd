@@ -27,7 +27,7 @@ np.random.seed(SEED)
 def main(config):
     logger = config.get_logger('train')
 
-    # setup data_loader instances
+    # setup data_loader instances for training and validation
     data_loader = config.init_obj('data_loader', module_data)   
     valid_data_loader = data_loader.split_validation()
     

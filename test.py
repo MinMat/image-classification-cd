@@ -78,6 +78,8 @@ def get_random_images(num,dataloader):
 def main(config):
     
     logger = config.get_logger('test')
+    
+    # setup data_loader instances for training and validation
     data_loader = config.init_obj('data_loader', module_data)
     test_data_loader =  data_loader.split_test() 
     

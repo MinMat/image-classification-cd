@@ -45,11 +45,8 @@ class BaseDataLoader(DataLoader):
 
         #This is validaton set
         valid_idx = idx_full[0:len_valid]
-        
         # This is training set
         train_idx = np.delete(idx_full, np.arange(0, len_valid))
-        
-        
         test_split = 0.8
         
         if isinstance(test_split, int):

@@ -15,7 +15,6 @@ def write_label_predictions(model, device, loader):
     model.eval()
     predictions = {}
     with torch.no_grad():
-        set_trace()
         for i, (data, target) in enumerate(tqdm(loader)):
             sample_fname, _ = loader.dataset.samples[i]
             data, target = data.to(device), target.to(device)
@@ -36,25 +35,27 @@ def write_label_predictions(model, device, loader):
 
 def main(config):
     logger = config.get_logger('predict')
-    
-        
-    # setup data_loader for test instances
+   
     # setup data_loader instances
     data_loader = config.init_obj('predict_data_loader', module_data)
+    
+    #Make predictions on the test data
     test_data_loader =  data_loader.split_test() 
     
     # build model architecture
     model = config.init_obj('arch', module_arch)
     logger.info(model)
     logger.info('Loading checkpoint: {} ...'.format(config.resume))
-    checkpoint = torch.load(config.resume)
+    
+     # prepare model for testing
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    
+    checkpoint = torch.load(config.resume, device)
     state_dict = checkpoint['state_dict']
     if config['n_gpu'] > 1:
         model = torch.nn.DataParallel(model)
     model.load_state_dict(state_dict)
     
-    # prepare model for testing
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
     predictions = write_label_predictions(model, device, data_loader)
     
